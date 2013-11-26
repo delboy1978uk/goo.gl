@@ -13,7 +13,7 @@ class Del_Googl_Url
         if ( $oauth_key != null )
         {
             $this->oauth_key = $oauth_key;
-            $this->google_url .= 'key='.$oauth_key.'&';
+            $this->google_url .= 'key='.$oauth_key;
         }
 
         // init connection
@@ -36,7 +36,7 @@ class Del_Googl_Url
         $this->oauth_key = $key;
     }
 
-    public function shorten($url)
+    public function shorten($url, $verbose = false)
     {
         // if we already have the shortened link then return it
         if (!empty(self::$buffer[$url]) )
@@ -55,17 +55,30 @@ class Del_Googl_Url
         curl_setopt($this->curl, CURLOPT_HTTPHEADER, Array('Content-Type: application/json'));
 
         //get result, stick in memory, and return result
-        $result = json_decode(curl_exec($this->curl))->id;
+        if($verbose == true)
+        {
+            $result = json_decode(curl_exec($this->curl));
+        }
+        else
+        {
+            $result = json_decode(curl_exec($this->curl))->id;
+        }
+
         self::$buffer[$url] = $result;
         return $result;
     }
 
-    public function expand($url)
+    public function expand($url, $verbose = false)
     {
         // Set cURL options specific to a expand request
         curl_setopt($this->curl, CURLOPT_HTTPGET, true);
         curl_setopt($this->curl, CURLOPT_URL, $this->google_url.'shortUrl='.$url);
-        return json_decode(curl_exec($this->curl))->longUrl;
+        $result = json_decode(curl_exec($this->curl));
+        if($verbose == true)
+        {
+            return $result;
+        }
+        return $result->longUrl;
     }
 }
 
